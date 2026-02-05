@@ -82,22 +82,50 @@ Brico/
 
 ---
 
-## 🛠️ Installazione
+## 🛠️ Guida all'Installazione
 
-1.  **Requisiti**:
-    *   Web Server (Apache/Nginx)
-    *   PHP 8.1 o superiore
-    *   MySQL 8.0 o MariaDB
-    *   Estensione PHP `pdo_mysql` abilitata
+Segui questi passaggi per configurare il sistema sul tuo ambiente locale o server.
 
-2.  **Configurazione**:
-    *   Rinomina o modifica `config/config.php` con le tue credenziali database.
+### 1. Requisiti di Sistema
+Assicurati di avere installato:
+*   **Web Server**: Apache o Nginx (consigliato: **Laragon** su Windows per un setup rapido).
+*   **PHP**: Versione 8.1 o superiore.
+*   **Database**: MySQL 8.0+ o MariaDB.
+*   **Estensioni PHP**: `pdo`, `pdo_mysql`.
 
-3.  **Setup Database**:
-    *   Apri il terminale nella root del progetto.
-    *   Esegui l'installazione:
+### 2. Configurazione Database
+1.  Accedi al tuo gestore database (es. phpMyAdmin o HeidiSQL).
+2.  Crea un nuovo database vuoto (es. `brico_db`).
+3.  **Importazione Dati**:
+    *   **Opzione A (Consigliata - Backup Completo)**: Importa il file `setup/full_backup.sql` che contiene struttura e dati di esempio pronti all'uso.
+    *   **Opzione B (Da Zero)**: Esegui lo script di installazione via browser o terminale:
         ```bash
-        cd setup
+        php setup/install_db.php
+        ```
+
+### 3. Configurazione Applicazione
+1.  Vai nella cartella `config/`.
+2.  Copia il file `config.sample.php` e rinominalo in `config.php`.
+3.  Apri `config.php` con un editor di testo e imposta i parametri di connessione:
+    ```php
+    define('DB_HOST', 'localhost');
+    define('DB_NAME', 'brico_db'); // Il nome del database creato
+    define('DB_USER', 'root');     // Il tuo utente MySQL
+    define('DB_PASS', '');         // La tua password MySQL
+    ```
+
+### 4. Avvio
+1.  Configura il tuo Web Server per puntare alla cartella `public/` del progetto come **Document Root**.
+2.  Apri il browser e vai all'indirizzo configurato (es. `http://brico.test`).
+3.  **Credenziali di Accesso Default**:
+    *   Email: `admin@brico.local`
+    *   Password: `password`
+
+### 5. Configurazione Stampante (Opzionale)
+Per abilitare la stampa scontrini:
+1.  Installa il driver della tua stampante fiscale (es. WinECRCom).
+2.  Configura il driver per monitorare la cartella `public/spool/`.
+3.  Assicurati che PHP abbia i permessi di scrittura su questa cartella.
         php install_db.php
         ```
 
