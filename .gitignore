@@ -1,0 +1,19 @@
+# Config
+config/config.php
+
+# Vendor
+/vendor
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# App specific
+public/spool/*
+!public/spool/.gitkeep
+*.log
