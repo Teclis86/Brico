@@ -3,8 +3,15 @@ namespace App\Controllers;
 
 use App\Core\Database;
 
+/**
+ * Controller per la gestione delle Vendite (Storico e Reportistica)
+ */
 class SalesController {
     
+    /**
+     * Elenca le ultime vendite effettuate.
+     * Recupera anche i dettagli del cliente e il numero di articoli per riga.
+     */
     public function index() {
         $db = Database::getInstance();
         
@@ -20,6 +27,12 @@ class SalesController {
         require __DIR__ . '/../../templates/sales/index.php';
     }
 
+    /**
+     * Mostra il dettaglio di una singola vendita.
+     * Recupera testata vendita e righe articoli.
+     * 
+     * @param int $_GET['id'] ID della vendita
+     */
     public function detail() {
         $id = $_GET['id'] ?? 0;
         $db = Database::getInstance();
@@ -43,13 +56,21 @@ class SalesController {
         require __DIR__ . '/../../templates/sales/detail.php';
     }
 
+    /**
+     * Genera un report delle vendite per un intervallo di date.
+     * Calcola:
+     * - Fatturato totale
+     * - Costo totale (basato sul costo storico al momento della vendita)
+     * - Margine (utile e percentuale)
+     * - Statistiche giornaliere
+     */
     public function report() {
         $db = Database::getInstance();
         
         $startDate = $_GET['start'] ?? date('Y-m-01');
         $endDate = $_GET['end'] ?? date('Y-m-d');
         
-        // Summary Query
+        // Summary Query (Totali periodo)
         $sqlSummary = "SELECT 
                         SUM(si.subtotal) as total_revenue,
                         SUM(si.quantity * COALESCE(si.cost_at_sale, 0)) as total_cost,
@@ -65,7 +86,7 @@ class SalesController {
         $totalMargin = $totalRevenue - $totalCost;
         $marginPercent = $totalRevenue > 0 ? ($totalMargin / $totalRevenue) * 100 : 0;
 
-        // Dettaglio giornaliero
+        // Dettaglio giornaliero (Grafici e Tabelle)
         $sqlDaily = "SELECT 
                         DATE(s.created_at) as date,
                         COUNT(DISTINCT s.id) as transactions,

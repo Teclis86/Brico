@@ -4,8 +4,16 @@ namespace App\Controllers;
 use App\Models\StockMovement;
 use App\Models\Product;
 
+/**
+ * Controller per la gestione del Magazzino
+ * Gestisce i movimenti manuali di carico/scarico e visualizza lo storico movimenti.
+ */
 class InventoryController {
     
+    /**
+     * Elenca tutti i movimenti di magazzino.
+     * Include vendite, acquisti, rettifiche manuali, DDT, ecc.
+     */
     public function index() {
         $movementModel = new StockMovement();
         $movements = $movementModel->getAll();
@@ -13,6 +21,10 @@ class InventoryController {
         require __DIR__ . '/../../templates/inventory/index.php';
     }
 
+    /**
+     * Mostra il form per registrare un movimento manuale.
+     * Utile per rettifiche inventariali, carichi merce, o scarichi per rottura/uso interno.
+     */
     public function create() {
         // Mostra form per carico/scarico
         $productModel = new Product();
@@ -28,9 +40,13 @@ class InventoryController {
         require __DIR__ . '/../../templates/inventory/form.php';
     }
 
+    /**
+     * Salva il movimento manuale nel database.
+     * Aggiorna automaticamente la giacenza del prodotto.
+     */
     public function store() {
         $productId = $_POST['product_id'];
-        $type = $_POST['type']; // in, out
+        $type = $_POST['type']; // in (carico), out (scarico)
         $quantity = (int)$_POST['quantity'];
         $documentRef = $_POST['document_ref'];
         $notes = $_POST['notes'];

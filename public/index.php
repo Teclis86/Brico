@@ -1,4 +1,9 @@
 <?php
+/**
+ * Entry Point dell'Applicazione Brico
+ * Gestisce l'inizializzazione, l'autoloader e il routing delle richieste.
+ */
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -28,10 +33,14 @@ spl_autoload_register(function ($class) {
 });
 
 // Routing di base
+// Recupera il parametro 'page' dalla query string (es. index.php?page=products)
+// Default: login
 $page = $_GET['page'] ?? 'login';
 
-// Simple Router
+// Router Semplice (Switch Case)
+// Smista la richiesta al controller appropriato
 switch ($page) {
+    // --- Autenticazione ---
     case 'login':
         require __DIR__ . '/../templates/auth/login.php';
         break;

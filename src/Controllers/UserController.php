@@ -3,8 +3,16 @@ namespace App\Controllers;
 
 use App\Core\Database;
 
+/**
+ * Controller per la gestione Utenti (Operatori)
+ * Accessibile solo agli amministratori.
+ */
 class UserController {
     
+    /**
+     * Elenca tutti gli utenti registrati.
+     * Richiede ruolo 'admin'.
+     */
     public function index() {
         if ($_SESSION['role'] !== 'admin') {
             die("Accesso negato.");
@@ -16,11 +24,18 @@ class UserController {
         require __DIR__ . '/../../templates/users/index.php';
     }
 
+    /**
+     * Mostra il form di creazione nuovo utente.
+     */
     public function create() {
         if ($_SESSION['role'] !== 'admin') die("Accesso negato.");
         require __DIR__ . '/../../templates/users/form.php';
     }
 
+    /**
+     * Salva il nuovo utente nel database.
+     * Password viene hashata prima del salvataggio.
+     */
     public function store() {
         if ($_SESSION['role'] !== 'admin') die("Accesso negato.");
 
@@ -43,6 +58,10 @@ class UserController {
         exit;
     }
 
+    /**
+     * Mostra il form di modifica utente esistente.
+     * @param int $_GET['id'] ID utente
+     */
     public function edit() {
         if ($_SESSION['role'] !== 'admin') die("Accesso negato.");
         $id = $_GET['id'];
@@ -52,6 +71,10 @@ class UserController {
         require __DIR__ . '/../../templates/users/form.php';
     }
 
+    /**
+     * Aggiorna i dati di un utente.
+     * La password viene aggiornata solo se fornita.
+     */
     public function update() {
         if ($_SESSION['role'] !== 'admin') die("Accesso negato.");
         
@@ -77,6 +100,10 @@ class UserController {
         exit;
     }
 
+    /**
+     * Elimina un utente.
+     * Impedisce l'auto-cancellazione.
+     */
     public function delete() {
         if ($_SESSION['role'] !== 'admin') die("Accesso negato.");
         $id = $_POST['id'];

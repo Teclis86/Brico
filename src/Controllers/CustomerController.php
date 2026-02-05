@@ -4,8 +4,16 @@ namespace App\Controllers;
 use App\Core\Database;
 use App\Models\Customer;
 
+/**
+ * Controller per la gestione Clienti
+ * Gestisce l'anagrafica clienti e la visualizzazione dello storico acquisti.
+ */
 class CustomerController {
     
+    /**
+     * Elenco clienti.
+     * Supporta filtro di ricerca testuale (nome, email, telefono).
+     */
     public function index() {
         $customerModel = new Customer();
         $search = $_GET['q'] ?? '';
@@ -14,6 +22,10 @@ class CustomerController {
         require __DIR__ . '/../../templates/customers/index.php';
     }
 
+    /**
+     * Mostra il form di creazione cliente o processa il salvataggio.
+     * Gestisce sia GET (mostra form) che POST (salva dati).
+     */
     public function create() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->store();
@@ -22,6 +34,9 @@ class CustomerController {
         require __DIR__ . '/../../templates/customers/create.php';
     }
 
+    /**
+     * Salva un nuovo cliente nel database.
+     */
     public function store() {
         $customerModel = new Customer();
         $customerModel->create($_POST);
@@ -29,6 +44,16 @@ class CustomerController {
         exit;
     }
 
+    /**
+     * Mostra la scheda dettagliata del cliente.
+     * Include:
+     * - Dati anagrafici
+     * - Storico scontrini
+     * - Storico DDT
+     * - Totale speso (Lifetime Value)
+     * 
+     * @param int $_GET['id'] ID cliente
+     */
     public function detail() {
         $id = $_GET['id'] ?? 0;
         $customerModel = new Customer();
@@ -61,10 +86,15 @@ class CustomerController {
         require __DIR__ . '/../../templates/customers/detail.php';
     }
 
+    /**
+     * API Endpoint per la ricerca clienti via AJAX.
+     * Utilizzato nei form (es. nel POS o nel DDT) per l'autocomplete.
+     */
     public function apiSearch() {
         header('Content-Type: application/json');
         $q = $_GET['q'] ?? '';
         
+        // Minimo 2 caratteri per la ricerca
         if (strlen($q) < 2) {
             echo json_encode([]);
             exit;

@@ -5,8 +5,16 @@ use App\Core\Database;
 use App\Models\Product;
 use PDO;
 
+/**
+ * Controller per la gestione dei Documenti di Trasporto (DDT)
+ * Gestisce il ciclo di vita dei DDT: creazione, stampa, modifica e annullamento.
+ */
 class DdtController {
     
+    /**
+     * Elenca i DDT recenti.
+     * Ordinati per data e ID decrescente.
+     */
     public function index() {
         $db = Database::getInstance();
         $ddts = $db->query("SELECT d.*, u.username 
@@ -17,6 +25,10 @@ class DdtController {
         require __DIR__ . '/../../templates/ddt/index.php';
     }
 
+    /**
+     * Cerca un DDT tramite il suo numero (o barcode).
+     * Se trovato, reindirizza al dettaglio.
+     */
     public function searchByBarcode() {
         $barcode = $_GET['barcode'] ?? '';
         $barcode = trim($barcode);
@@ -44,6 +56,12 @@ class DdtController {
         }
     }
 
+    /**
+     * Mostra i dettagli di un DDT specifico.
+     * Include testata e righe articoli.
+     * 
+     * @param int $_GET['id'] ID del DDT
+     */
     public function detail() {
         if (!isset($_GET['id'])) {
             header("Location: " . APP_URL . "/?page=ddt");
@@ -74,6 +92,16 @@ class DdtController {
         require __DIR__ . '/../../templates/ddt/detail.php';
     }
 
+    /**
+     * Annulla un DDT.
+     * Operazione irreversibile che:
+     * 1. Controlla se il DDT è già annullato
+     * 2. Ripristina le giacenze di magazzino per ogni articolo
+     * 3. Crea movimenti di rettifica stock (tipo 'ddt_cancel')
+     * 4. Imposta lo stato del DDT a 'cancelled'
+     * 
+     * Esegue tutto in una transazione atomica.
+     */
     public function cancel() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_GET['id'])) {
             header("Location: " . APP_URL . "/?page=ddt");
@@ -141,6 +169,10 @@ class DdtController {
         exit;
     }
 
+    /**
+     * Mostra il form di creazione DDT.
+     * Calcola automaticamente il prossimo numero progressivo (formato YYYY-NNN).
+     */
     public function create() {
         $db = Database::getInstance();
         $pdo = $db->getConnection();
@@ -170,6 +202,14 @@ class DdtController {
         require __DIR__ . '/../../templates/ddt/create.php';
     }
 
+    /**
+     * Salva un nuovo DDT.
+     * Transazione atomica che:
+     * 1. Crea la testata del DDT
+     * 2. Inserisce le righe articoli
+     * 3. Scarica il magazzino (decrementa giacenza)
+     * 4. Registra i movimenti di stock
+     */
     public function store() {
         $db = Database::getInstance();
         $pdo = $db->getConnection();
@@ -257,6 +297,10 @@ class DdtController {
         }
     }
 
+    /**
+     * Prepara la vista per la stampa del DDT.
+     * Recupera dati testata e righe.
+     */
     public function print() {
         if (!isset($_GET['id'])) die("ID mancante");
         
@@ -282,6 +326,11 @@ class DdtController {
         require __DIR__ . '/../../templates/ddt/print.php';
     }
 
+    /**
+     * Mostra il form di modifica DDT.
+     * Impedisce la modifica se il DDT è annullato.
+     * Carica i dati esistenti e la lista prodotti.
+     */
     public function edit() {
         if (!isset($_GET['id'])) {
             header("Location: " . APP_URL . "/?page=ddt");
@@ -321,6 +370,17 @@ class DdtController {
         require __DIR__ . '/../../templates/ddt/edit.php';
     }
 
+    /**
+     * Aggiorna un DDT esistente.
+     * Logica complessa che:
+     * 1. Verifica che il DDT non sia annullato
+     * 2. Annulla gli effetti dello stock precedente (riaccredita giacenza)
+     * 3. Cancella le vecchie righe
+     * 4. Aggiorna la testata
+     * 5. Inserisce le nuove righe e aggiorna nuovamente lo stock (addebita giacenza)
+     * 
+     * Tutto in transazione.
+     */
     public function update() {
         if (!isset($_GET['id'])) die("ID mancante");
         $id = $_GET['id'];
